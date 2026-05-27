@@ -25,7 +25,7 @@
     --body:'Newsreader',Georgia,serif;
     --mono:'Spline Sans Mono',ui-monospace,monospace;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth}
   body{
     background:var(--paper);
@@ -131,15 +131,16 @@
   #timer-fill{height:100%;width:100%;background:var(--green);transform-origin:left}
   #timer-fill.warn{background:var(--amber)}
   #timer-fill.danger{background:var(--red)}
-  .timer-num{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.04em;min-width:42px;text-align:right;color:var(--ink-soft)}
+  .timer-num{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.04em;min-width:96px;text-align:right;color:var(--ink-soft);white-space:nowrap}
   .timer-num.danger{color:var(--red)}
 
   .prompt{text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px}
   #answer-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
   .ans{
     font-family:var(--display);font-size:19px;font-weight:500;text-transform:capitalize;
-    padding:16px 0;background:var(--paper);border:1.5px solid var(--ink);cursor:pointer;
+    padding:16px 0;min-height:52px;background:var(--paper);border:1.5px solid var(--ink);cursor:pointer;
     transition:transform .08s ease,background .15s ease;
+    touch-action:manipulation;user-select:none;
   }
   .ans:hover{background:var(--paper-dim)}
   .ans:active{transform:scale(.95)}
@@ -148,8 +149,9 @@
   /* buttons */
   .btn{
     font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;
-    padding:14px 28px;background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);
+    padding:14px 28px;min-height:48px;background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);
     cursor:pointer;transition:transform .1s ease,box-shadow .1s ease;
+    touch-action:manipulation;
   }
   .btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(35,32,26,.25)}
   .btn:active{transform:none;box-shadow:none}
@@ -184,9 +186,20 @@
 
   @media(max-width:560px){
     body{font-size:17px}
-    #stimulus{font-size:56px}
-    .ans{font-size:16px;padding:13px 0}
-    .stage{height:160px}
+    h1{font-size:clamp(40px,13vw,60px)}
+    #stimulus{font-size:52px}
+    #answer-row{grid-template-columns:1fr 1fr}
+    .ans{font-size:17px;padding:15px 0}
+    .stage{height:150px}
+    .lab{padding:24px 18px}
+    .wrap{padding:0 20px}
+    .stats{gap:12px}
+    .stat{min-width:calc(50% - 6px)}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;scroll-behavior:auto !important}
+    #timer-fill{transition:none}
   }
 </style>
 </head>
@@ -371,10 +384,11 @@
       var left=Math.max(0,TIME_LIMIT-elapsed);
       var frac=left/TIME_LIMIT;
       fill.style.transform='scaleX('+frac+')';
-      num.textContent=(left/1000).toFixed(1)+'s';
       var danger=frac<=0.33,warn=frac<=0.66;
       fill.className=danger?'danger':(warn?'warn':'');
       num.className='timer-num'+(danger?' danger':'');
+      var tag=danger?' · hurry':(warn?' · low':'');
+      num.textContent=(left/1000).toFixed(1)+'s'+tag;
       if(left<=0){state.raf=0;timeout();return;}
       state.raf=requestAnimationFrame(frame);
     }
@@ -440,7 +454,7 @@
     $('timer-fill').className='danger';
     $('timer-fill').style.transform='scaleX(0)';
     $('timer-num').className='timer-num danger';
-    $('timer-num').textContent='0.0s';
+    $('timer-num').textContent='0.0s · time';
     $('progress').style.width=((state.trial+1)/PER_ROUND*100)+'%';
     advance(1120);
   }
