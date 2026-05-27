@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stroop Test — name the ink, not the word</title>
+<meta name="description" content="An interactive Stroop effect experiment. Become the subject: name ink colours, beat your reading brain, and measure your own cognitive interference.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Spline+Sans+Mono:wght@400;500&family=Newsreader:ital,opsz@0,6..72;1,6..72&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4efe4;
+    --paper-dim:#ebe4d3;
+    --ink:#23201a;
+    --ink-soft:#5b554a;
+    --ink-faint:#8c8576;
+    --rule:#c9c0aa;
+    --red:#c8453b;
+    --green:#1f8a63;
+    --blue:#2f72c4;
+    --amber:#d98a1f;
+    --stamp:#b23a2e;
+    --display:'Fraunces',Georgia,serif;
+    --body:'Newsreader',Georgia,serif;
+    --mono:'Spline Sans Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:19px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(rgba(120,110,85,.05) 1px,transparent 1px);
+    background-size:22px 22px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 28px}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  /* ---- top bar ---- */
+  .topbar{
+    border-bottom:1.5px solid var(--ink);
+    padding:14px 0;
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .topbar .dept{color:var(--ink-soft)}
+  .topbar .file-no{color:var(--ink-faint)}
+
+  /* ---- hero ---- */
+  header.hero{padding:64px 0 48px;text-align:center;border-bottom:1px solid var(--rule)}
+  .kicker{
+    font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--stamp);margin-bottom:22px;
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(44px,9vw,82px);
+    line-height:.98;
+    letter-spacing:-.02em;
+    margin-bottom:24px;
+  }
+  h1 .swatch{display:inline-block;transition:transform .3s ease}
+  h1 .s-r{color:var(--red)} h1 .s-g{color:var(--green)}
+  h1 .s-b{color:var(--blue)} h1 .s-a{color:var(--amber)}
+  h1:hover .swatch{transform:translateY(-4px) rotate(-3deg)}
+  .lede{
+    font-size:21px;color:var(--ink-soft);max-width:520px;margin:0 auto 32px;
+    font-style:italic;
+  }
+  .scroll-cue{
+    font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .scroll-cue span{display:block;font-size:18px;margin-top:6px;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+  /* ---- section scaffolding ---- */
+  section{padding:56px 0;border-bottom:1px solid var(--rule)}
+  .sec-tag{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--stamp);margin-bottom:14px;display:flex;align-items:center;gap:10px;
+  }
+  .sec-tag::before{content:"";width:26px;height:1.5px;background:var(--stamp)}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(28px,5vw,40px);line-height:1.08;letter-spacing:-.015em;margin-bottom:18px}
+  section p{margin-bottom:18px;color:#36322a}
+  section p:last-child{margin-bottom:0}
+  em{font-style:italic}
+  strong{font-weight:600}
+
+  /* ---- demo cards in intro ---- */
+  .demo-pair{display:flex;gap:18px;flex-wrap:wrap;margin:30px 0}
+  .demo-card{
+    flex:1;min-width:220px;background:var(--paper-dim);
+    border:1.5px solid var(--ink);padding:20px 22px;
+    box-shadow:5px 5px 0 rgba(35,32,26,.12);
+  }
+  .demo-card .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px}
+  .demo-card .word{font-family:var(--display);font-size:40px;font-weight:600}
+
+  /* ---- the experiment ---- */
+  #experiment{background:var(--paper-dim)}
+  .lab{
+    background:var(--paper);
+    border:1.5px solid var(--ink);
+    box-shadow:8px 8px 0 rgba(35,32,26,.14);
+    padding:32px 30px;
+    margin-top:28px;
+  }
+  .screen{display:none}
+  .screen.active{display:block;animation:fade .4s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .run-meta{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:8px}
+  .track{height:6px;background:var(--paper-dim);border:1px solid var(--rule);margin-bottom:28px}
+  #progress{height:100%;background:var(--ink);width:0;transition:width .25s ease}
+
+  .stage{
+    height:200px;display:flex;align-items:center;justify-content:center;
+    border:1.5px dashed var(--rule);margin-bottom:22px;background:var(--paper);
+  }
+  #stimulus{font-family:var(--display);font-size:78px;font-weight:600;letter-spacing:.01em}
+
+  /* per-trial countdown */
+  .timer-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .timer-track{flex:1;height:10px;background:var(--paper-dim);border:1.5px solid var(--ink);overflow:hidden}
+  #timer-fill{height:100%;width:100%;background:var(--green);transform-origin:left}
+  #timer-fill.warn{background:var(--amber)}
+  #timer-fill.danger{background:var(--red)}
+  .timer-num{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.04em;min-width:42px;text-align:right;color:var(--ink-soft)}
+  .timer-num.danger{color:var(--red)}
+
+  .prompt{text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px}
+  #answer-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .ans{
+    font-family:var(--display);font-size:19px;font-weight:500;text-transform:capitalize;
+    padding:16px 0;background:var(--paper);border:1.5px solid var(--ink);cursor:pointer;
+    transition:transform .08s ease,background .15s ease;
+  }
+  .ans:hover{background:var(--paper-dim)}
+  .ans:active{transform:scale(.95)}
+  #feedback{text-align:center;height:24px;margin-top:14px;font-family:var(--mono);font-size:13px;letter-spacing:.04em}
+
+  /* buttons */
+  .btn{
+    font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+    padding:14px 28px;background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);
+    cursor:pointer;transition:transform .1s ease,box-shadow .1s ease;
+  }
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(35,32,26,.25)}
+  .btn:active{transform:none;box-shadow:none}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+
+  /* results */
+  .verdict{font-family:var(--display);font-size:22px;line-height:1.4;margin-bottom:24px}
+  .stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:26px}
+  .stat{flex:1;min-width:150px;background:var(--paper-dim);border:1.5px solid var(--ink);padding:18px}
+  .stat.hl{background:var(--stamp);border-color:var(--stamp);color:var(--paper)}
+  .stat .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+  .stat.hl .k{color:rgba(255,255,255,.85)}
+  .stat .v{font-family:var(--display);font-size:34px;font-weight:600;line-height:1}
+  .stat .v small{font-size:14px;font-weight:400;color:var(--ink-faint)}
+  .stat.hl .v small{color:rgba(255,255,255,.8)}
+  .chart-box{position:relative;width:100%;height:260px;margin-bottom:14px}
+  .acc-note{font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:.03em}
+
+  /* science section pull-quote + facts */
+  .pull{
+    font-family:var(--display);font-size:26px;font-weight:500;line-height:1.3;
+    border-left:3px solid var(--stamp);padding-left:22px;margin:28px 0;color:var(--ink);
+  }
+  .facts{display:flex;gap:18px;flex-wrap:wrap;margin-top:28px}
+  .fact{flex:1;min-width:200px;border-top:2px solid var(--ink);padding-top:14px}
+  .fact .n{font-family:var(--display);font-size:30px;font-weight:600;color:var(--stamp);margin-bottom:4px}
+  .fact .d{font-size:16px;color:var(--ink-soft)}
+
+  footer{padding:40px 0 56px;text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink-faint)}
+  footer .cite{margin-top:8px;color:var(--ink-soft)}
+
+  @media(max-width:560px){
+    body{font-size:17px}
+    #stimulus{font-size:56px}
+    .ans{font-size:16px;padding:13px 0}
+    .stage{height:160px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <span class="dept">Dept. of Experimental Psychology</span>
+    <span class="file-no">File No. 1935-S</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">An interactive demonstration</div>
+    <h1>The
+      <span class="swatch s-r">Str</span><span class="swatch s-g">oo</span><span class="swatch s-b">p</span>
+      <br>Test</h1>
+    <p class="lede">Your eyes read before you tell them to. This page proves it — using you as the subject.</p>
+    <div class="scroll-cue">Begin the briefing<span>↓</span></div>
+  </div>
+</header>
+
+<section id="brief">
+  <div class="wrap">
+    <div class="sec-tag">The briefing</div>
+    <h2>One simple instruction</h2>
+    <p>You'll be shown a word, printed in coloured ink. Your job is to name the <strong>colour of the ink</strong> — and to completely ignore what the word actually spells.</p>
+    <p>It sounds trivial. It is not. When the word and the ink disagree, something in your mind resists, and that resistance is measurable down to the millisecond.</p>
+    <div class="demo-pair">
+      <div class="demo-card">
+        <div class="lbl">Agreement — ink matches word</div>
+        <div class="word" style="color:var(--green)">GREEN</div>
+      </div>
+      <div class="demo-card">
+        <div class="lbl">Conflict — ink fights word</div>
+        <div class="word" style="color:var(--red)">GREEN</div>
+      </div>
+    </div>
+    <p>In the second card the correct answer is <strong>red</strong> — the ink — even though every literate instinct you have is screaming "green". Two rounds of twelve trials each lie ahead. Speed and accuracy are both recorded.</p>
+  </div>
+</section>
+
+<section id="experiment">
+  <div class="wrap">
+    <div class="sec-tag">The experiment</div>
+    <h2>Take your place as the subject</h2>
+    <p>Nothing here is pre-decided. The numbers you see at the end are your own.</p>
+
+    <div class="lab" aria-live="polite">
+      <div class="sr-only">Interactive Stroop experiment. Name the ink colour of each word by choosing a button.</div>
+
+      <div class="screen active" id="screen-intro">
+        <p style="font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:24px">
+          Round 1 presents matching word-and-ink pairs. Round 2 presents conflicting ones. You have <strong>3 seconds per word</strong> — let the bar run out and the trial is logged as a miss. Respond fast.</p>
+        <button class="btn" id="btn-start">Start round 1 →</button>
+      </div>
+
+      <div class="screen" id="screen-trial">
+        <div class="run-meta">
+          <span id="round-label">Round 1</span>
+          <span id="trial-counter">Trial 1 of 12</span>
+        </div>
+        <div class="track"><div id="progress"></div></div>
+        <div class="timer-row">
+          <div class="timer-track"><div id="timer-fill"></div></div>
+          <span class="timer-num" id="timer-num">3.0s</span>
+        </div>
+        <div class="stage"><span id="stimulus">READY</span></div>
+        <div class="prompt">Click the ink colour</div>
+        <div id="answer-row"></div>
+        <div id="feedback"></div>
+      </div>
+
+      <div class="screen" id="screen-results">
+        <div class="verdict" id="verdict"></div>
+        <div class="stats">
+          <div class="stat">
+            <div class="k">Round 1 · agreement</div>
+            <div class="v"><span id="r-cong">0</span> <small>ms avg</small></div>
+          </div>
+          <div class="stat">
+            <div class="k">Round 2 · conflict</div>
+            <div class="v"><span id="r-incong">0</span> <small>ms avg</small></div>
+          </div>
+          <div class="stat hl">
+            <div class="k">Your interference</div>
+            <div class="v">+<span id="r-diff">0</span> <small>ms</small></div>
+          </div>
+        </div>
+        <div class="chart-box">
+          <canvas id="chart" role="img" aria-label="Bar chart comparing your average reaction time on agreement versus conflict trials"></canvas>
+        </div>
+        <p class="acc-note" id="accuracy-note"></p>
+        <div class="btn-row">
+          <button class="btn" id="btn-again">↻ Run it again</button>
+          <button class="btn ghost" id="btn-explain">Explain my result ↗</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="science">
+  <div class="wrap">
+    <div class="sec-tag">The science</div>
+    <h2>Why your reading brain wins</h2>
+    <p>For a literate adult, reading is not a choice. After years of practice it has become <em>automatic</em> — it happens the instant your eyes land on a word, with no permission required. Naming a colour, by contrast, is a slower, more deliberate act.</p>
+    <p class="pull">When the word and the ink disagree, two answers arrive at once — and your mind must spend time throwing the wrong one away.</p>
+    <p>That discarding takes time. The gap between your two rounds — your interference score — is a direct measurement of how long your brain needed to suppress the automatic reader and let the deliberate colour-namer through. Psychologists call this <strong>response conflict</strong>, and it is handled largely by the same frontal-lobe machinery you use for focus and self-control.</p>
+    <p>The effect is also <strong>asymmetric</strong>: if the task were reversed — read the word, ignore the colour — the conflicting ink would barely slow you at all. Reading overpowers colour-naming, but not the other way around. That one-way street is the real signature of an automatic process.</p>
+    <div class="facts">
+      <div class="fact">
+        <div class="n">1935</div>
+        <div class="d">The year John Ridley Stroop published the original study.</div>
+      </div>
+      <div class="fact">
+        <div class="n">~100ms</div>
+        <div class="d">A typical slowdown on conflict trials for healthy adults.</div>
+      </div>
+      <div class="fact">
+        <div class="n">&gt;700</div>
+        <div class="d">Approximate number of papers the test has gone on to inspire.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Built as an interactive psychology explainer · Name the ink, not the word.</div>
+    <div class="cite">After Stroop, J. R. (1935), "Studies of interference in serial verbal reactions."</div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function(){
+  var COLORS=[
+    {name:'red',hex:'#c8453b'},
+    {name:'green',hex:'#1f8a63'},
+    {name:'blue',hex:'#2f72c4'},
+    {name:'amber',hex:'#d98a1f'}
+  ];
+  var PER_ROUND=12;
+  var TIME_LIMIT=3000;
+  var ROUNDS=[
+    {type:'congruent',label:'Round 1 · agreement'},
+    {type:'incongruent',label:'Round 2 · conflict'}
+  ];
+  var state={round:0,trial:0,startT:0,locked:false,data:[],raf:0};
+
+  function $(id){return document.getElementById(id);}
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function pick(a){return a[Math.floor(Math.random()*a.length)];}
+  function show(id){
+    ['screen-intro','screen-trial','screen-results'].forEach(function(s){
+      $(s).classList.toggle('active',s===id);
+    });
+  }
+
+  function buildAnswers(){
+    var row=$('answer-row');row.innerHTML='';
+    shuffle(COLORS).forEach(function(c){
+      var b=document.createElement('button');
+      b.className='ans';b.textContent=c.name;
+      b.setAttribute('aria-label','Ink colour is '+c.name);
+      b.onclick=function(){answer(c.name);};
+      row.appendChild(b);
+    });
+  }
+
+  function stopTimer(){
+    if(state.raf){cancelAnimationFrame(state.raf);state.raf=0;}
+  }
+
+  function runTimer(){
+    var fill=$('timer-fill'),num=$('timer-num');
+    function frame(now){
+      var elapsed=now-state.startT;
+      var left=Math.max(0,TIME_LIMIT-elapsed);
+      var frac=left/TIME_LIMIT;
+      fill.style.transform='scaleX('+frac+')';
+      num.textContent=(left/1000).toFixed(1)+'s';
+      var danger=frac<=0.33,warn=frac<=0.66;
+      fill.className=danger?'danger':(warn?'warn':'');
+      num.className='timer-num'+(danger?' danger':'');
+      if(left<=0){state.raf=0;timeout();return;}
+      state.raf=requestAnimationFrame(frame);
+    }
+    state.raf=requestAnimationFrame(frame);
+  }
+
+  function nextTrial(){
+    state.locked=false;
+    $('feedback').textContent='';
+    var rd=ROUNDS[state.round];
+    var ink=pick(COLORS),word;
+    if(rd.type==='congruent'){word=ink;}
+    else{word=pick(COLORS.filter(function(c){return c.name!==ink.name;}));}
+    state.current={ink:ink.name,word:word.name};
+    var s=$('stimulus');
+    s.textContent=word.name.toUpperCase();
+    s.style.color=ink.hex;
+    $('round-label').textContent=rd.label;
+    $('trial-counter').textContent='Trial '+(state.trial+1)+' of '+PER_ROUND;
+    $('progress').style.width=(state.trial/PER_ROUND*100)+'%';
+    $('timer-fill').className='';
+    $('timer-fill').style.transform='scaleX(1)';
+    $('timer-num').className='timer-num';
+    $('timer-num').textContent='3.0s';
+    buildAnswers();
+    state.startT=performance.now();
+    runTimer();
+  }
+
+  function advance(delay){
+    setTimeout(function(){
+      state.trial++;
+      if(state.trial>=PER_ROUND){
+        state.round++;state.trial=0;
+        if(state.round>=ROUNDS.length){showResults();return;}
+      }
+      nextTrial();
+    },delay);
+  }
+
+  function answer(chosen){
+    if(state.locked)return;
+    state.locked=true;
+    stopTimer();
+    var rt=performance.now()-state.startT;
+    var correct=(chosen===state.current.ink);
+    state.data.push({type:ROUNDS[state.round].type,rt:rt,correct:correct,timedOut:false});
+    var fb=$('feedback');
+    if(correct){fb.textContent='✓ correct · '+Math.round(rt)+' ms';fb.style.color='var(--green)';}
+    else{fb.textContent='✕ wrong — the ink was '+state.current.ink;fb.style.color='var(--red)';}
+    $('progress').style.width=((state.trial+1)/PER_ROUND*100)+'%';
+    advance(correct?560:1120);
+  }
+
+  function timeout(){
+    if(state.locked)return;
+    state.locked=true;
+    stopTimer();
+    state.data.push({type:ROUNDS[state.round].type,rt:TIME_LIMIT,correct:false,timedOut:true});
+    var fb=$('feedback');
+    fb.textContent='⏱ too slow — the ink was '+state.current.ink;
+    fb.style.color='var(--red)';
+    $('timer-fill').className='danger';
+    $('timer-fill').style.transform='scaleX(0)';
+    $('timer-num').className='timer-num danger';
+    $('timer-num').textContent='0.0s';
+    $('progress').style.width=((state.trial+1)/PER_ROUND*100)+'%';
+    advance(1120);
+  }
+
+  function avg(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:0;}
+
+  function showResults(){
+    show('screen-results');
+    var cong=state.data.filter(function(d){return d.type==='congruent'&&d.correct;}).map(function(d){return d.rt;});
+    var inc=state.data.filter(function(d){return d.type==='incongruent'&&d.correct;}).map(function(d){return d.rt;});
+    var cA=Math.round(avg(cong)),iA=Math.round(avg(inc));
+    var diff=iA-cA;
+    $('r-cong').textContent=cA;
+    $('r-incong').textContent=iA;
+    $('r-diff').textContent=diff>0?diff:0;
+    var v;
+    if(cong.length===0||inc.length===0){
+      v='Too many missed trials to measure interference cleanly — the 3-second limit caught you out. Give it another run and try to answer before the bar empties.';
+      diff=0;$('r-diff').textContent=0;
+    }
+    else if(diff>=120)v='Strong interference. Your reading brain hijacked the task hard — each conflicting word cost you '+diff+' ms. This is the textbook Stroop pattern.';
+    else if(diff>=40)v='Clear interference. The mismatched words slowed you by '+diff+' ms on average. Your automatic reading is fighting your colour-naming, exactly as predicted.';
+    else if(diff>0)v='Mild interference of '+diff+' ms. Unusually disciplined — but the conflicting words still cost you something.';
+    else v='Almost no slowdown — rare. Worth a second run, since most people lose 50 to 150 ms to conflicting words.';
+    $('verdict').textContent=v;
+    var timedOut=state.data.filter(function(d){return d.timedOut;}).length;
+    var wrong=state.data.filter(function(d){return !d.correct&&!d.timedOut;}).length;
+    var parts=[];
+    if(wrong)parts.push(wrong+' wrong answer'+(wrong>1?'s':''));
+    if(timedOut)parts.push(timedOut+' timeout'+(timedOut>1?'s':''));
+    $('accuracy-note').textContent=parts.length===0
+      ?'Perfect — 24 of 24 trials answered correctly inside the time limit.'
+      :parts.join(' and ')+' of 24 trials. Misses tend to cluster in the conflict round, itself a sign of interference.';
+    drawChart(cA,iA);
+  }
+
+  var chartRef=null;
+  function drawChart(c,i){
+    if(chartRef)chartRef.destroy();
+    chartRef=new Chart($('chart'),{
+      type:'bar',
+      data:{labels:['Agreement','Conflict'],datasets:[{
+        data:[c,i],
+        backgroundColor:['#1f8a63','#c8453b'],
+        borderColor:'#23201a',borderWidth:1.5,
+        barPercentage:.6
+      }]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return x.parsed.y+' ms';}}}},
+        scales:{
+          y:{beginAtZero:true,title:{display:true,text:'milliseconds',color:'#5b554a'},
+             ticks:{color:'#5b554a'},grid:{color:'rgba(0,0,0,.06)'}},
+          x:{ticks:{color:'#23201a',font:{size:14,family:'Spline Sans Mono'}},grid:{display:false}}
+        }
+      }
+    });
+  }
+
+  function reset(){
+    stopTimer();
+    state={round:0,trial:0,startT:0,locked:false,data:[],raf:0};
+    show('screen-trial');nextTrial();
+  }
+
+  $('btn-start').onclick=function(){show('screen-trial');nextTrial();};
+  $('btn-again').onclick=reset;
+  $('btn-explain').onclick=function(){
+    document.getElementById('science').scrollIntoView({behavior:'smooth'});
+  };
+})();
+</script>
+</body>
+</html>
