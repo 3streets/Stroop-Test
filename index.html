@@ -101,6 +101,48 @@
   }
   .demo-card .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px}
   .demo-card .word{font-family:var(--display);font-size:40px;font-weight:600}
+  .demo-card .ans-hint{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);margin-top:12px}
+  .demo-card .ans-hint b{color:var(--ink);font-weight:500}
+
+  /* how to play */
+  .how{list-style:none;counter-reset:step;margin:26px 0}
+  .how li{
+    counter-increment:step;position:relative;padding:0 0 16px 46px;
+    color:#36322a;
+  }
+  .how li:last-child{padding-bottom:0}
+  .how li::before{
+    content:counter(step);position:absolute;left:0;top:-2px;
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:14px;
+    border-radius:50%;
+  }
+
+  /* colour palette strip */
+  .palette{margin:26px 0}
+  .palette .cap{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:12px}
+  .swatches{display:flex;gap:12px;flex-wrap:wrap}
+  .sw{
+    flex:1;min-width:120px;border:1.5px solid var(--ink);background:var(--paper-dim);
+    display:flex;align-items:center;gap:10px;padding:10px 14px;
+  }
+  .sw .dot{width:22px;height:22px;border:1.5px solid var(--ink);flex-shrink:0}
+  .sw .nm{font-family:var(--display);font-size:18px;font-weight:600;text-transform:capitalize}
+
+  /* trial-screen reminder */
+  .reminder{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-soft);text-align:center;
+    background:var(--paper-dim);border:1px solid var(--rule);
+    padding:8px 12px;margin-bottom:18px;
+  }
+  .reminder b{color:var(--stamp);font-weight:500}
+
+  /* practice badge */
+  .practice-badge{
+    display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;background:var(--blue);color:#fff;padding:4px 10px;margin-bottom:14px;
+  }
 
   /* ---- the experiment ---- */
   #experiment{background:var(--paper-dim)}
@@ -144,7 +186,7 @@
   }
   .ans:hover{background:var(--paper-dim)}
   .ans:active{transform:scale(.95)}
-  #feedback{text-align:center;height:24px;margin-top:14px;font-family:var(--mono);font-size:13px;letter-spacing:.04em}
+  #feedback{text-align:center;min-height:24px;margin-top:14px;font-family:var(--mono);font-size:13px;letter-spacing:.04em}
 
   /* buttons */
   .btn{
@@ -226,20 +268,38 @@
 <section id="brief">
   <div class="wrap">
     <div class="sec-tag">The briefing</div>
-    <h2>One simple instruction</h2>
-    <p>You'll be shown a word, printed in coloured ink. Your job is to name the <strong>colour of the ink</strong> — and to completely ignore what the word actually spells.</p>
-    <p>It sounds trivial. It is not. When the word and the ink disagree, something in your mind resists, and that resistance is measurable down to the millisecond.</p>
+    <h2>How to play</h2>
+    <p>The whole test is one rule: name the <strong>colour of the ink</strong>, ignore the word itself. Here is exactly what you'll do:</p>
+    <ol class="how">
+      <li>A word appears on screen, printed in coloured ink.</li>
+      <li>Tap the button for the <strong>ink colour you see</strong> — not the word you read.</li>
+      <li>You have <strong>3 seconds</strong> per word. A bar counts down; if it empties, the trial is a miss.</li>
+    </ol>
+
+    <div class="palette">
+      <div class="cap">The four possible ink colours</div>
+      <div class="swatches">
+        <div class="sw"><span class="dot" style="background:var(--red)"></span><span class="nm">red</span></div>
+        <div class="sw"><span class="dot" style="background:var(--green)"></span><span class="nm">green</span></div>
+        <div class="sw"><span class="dot" style="background:var(--blue)"></span><span class="nm">blue</span></div>
+        <div class="sw"><span class="dot" style="background:var(--amber)"></span><span class="nm">amber</span></div>
+      </div>
+    </div>
+
+    <p>It sounds trivial. It is not. When the word and the ink disagree, something in your mind resists — and that resistance is measurable down to the millisecond.</p>
     <div class="demo-pair">
       <div class="demo-card">
         <div class="lbl">Agreement — ink matches word</div>
         <div class="word" style="color:var(--green)">GREEN</div>
+        <div class="ans-hint">Correct answer: <b>green</b></div>
       </div>
       <div class="demo-card">
         <div class="lbl">Conflict — ink fights word</div>
         <div class="word" style="color:var(--red)">GREEN</div>
+        <div class="ans-hint">Correct answer: <b>red</b> — it's the ink</div>
       </div>
     </div>
-    <p>In the second card the correct answer is <strong>red</strong> — the ink — even though every literate instinct you have is screaming "green". Two rounds of twelve trials each lie ahead. Speed and accuracy are both recorded.</p>
+    <p>In the conflict card the answer is <strong>red</strong>, the ink — even though every literate instinct you have is screaming "green". You'll get a short untimed warm-up first, then two rounds of twelve trials each.</p>
   </div>
 </section>
 
@@ -254,8 +314,8 @@
 
       <div class="screen active" id="screen-intro">
         <p style="font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:24px">
-          Round 1 presents matching word-and-ink pairs. Round 2 presents conflicting ones. You have <strong>3 seconds per word</strong> — let the bar run out and the trial is logged as a miss. Respond fast.</p>
-        <button class="btn" id="btn-start">Start round 1 →</button>
+          First, a quick untimed warm-up — three trials, no clock, just to learn the controls. Then two real rounds: matching pairs, then conflicting ones. Ready when you are.</p>
+        <button class="btn" id="btn-start">Start warm-up →</button>
       </div>
 
       <div class="screen" id="screen-trial">
@@ -264,6 +324,7 @@
           <span id="trial-counter">Trial 1 of 12</span>
         </div>
         <div class="track"><div id="progress"></div></div>
+        <div class="reminder">Tap the <b>ink colour</b> — not the word</div>
         <div class="timer-row">
           <div class="timer-track"><div id="timer-fill"></div></div>
           <span class="timer-num" id="timer-num">3.0s</span>
@@ -346,12 +407,15 @@
     {name:'amber',hex:'#d98a1f'}
   ];
   var PER_ROUND=12;
+  var PRACTICE_TRIALS=3;
   var TIME_LIMIT=3000;
   var ROUNDS=[
     {type:'congruent',label:'Round 1 · agreement'},
     {type:'incongruent',label:'Round 2 · conflict'}
   ];
-  var state={round:0,trial:0,startT:0,locked:false,data:[],raf:0};
+  var state={practice:true,round:0,trial:0,startT:0,locked:false,data:[],raf:0};
+
+  function trialsThisRound(){return state.practice?PRACTICE_TRIALS:PER_ROUND;}
 
   function $(id){return document.getElementById(id);}
   function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
@@ -398,35 +462,82 @@
   function nextTrial(){
     state.locked=false;
     $('feedback').textContent='';
-    var rd=ROUNDS[state.round];
+    var total=trialsThisRound();
+    var type;
+    if(state.practice){
+      type=Math.random()<0.5?'congruent':'incongruent';
+    } else {
+      type=ROUNDS[state.round].type;
+    }
     var ink=pick(COLORS),word;
-    if(rd.type==='congruent'){word=ink;}
+    if(type==='congruent'){word=ink;}
     else{word=pick(COLORS.filter(function(c){return c.name!==ink.name;}));}
-    state.current={ink:ink.name,word:word.name};
+    state.current={ink:ink.name,word:word.name,type:type};
     var s=$('stimulus');
     s.textContent=word.name.toUpperCase();
     s.style.color=ink.hex;
-    $('round-label').textContent=rd.label;
-    $('trial-counter').textContent='Trial '+(state.trial+1)+' of '+PER_ROUND;
-    $('progress').style.width=(state.trial/PER_ROUND*100)+'%';
-    $('timer-fill').className='';
-    $('timer-fill').style.transform='scaleX(1)';
-    $('timer-num').className='timer-num';
-    $('timer-num').textContent='3.0s';
+
+    if(state.practice){
+      $('round-label').textContent='Warm-up · no timer';
+      $('trial-counter').textContent='Practice '+(state.trial+1)+' of '+total;
+    } else {
+      $('round-label').textContent=ROUNDS[state.round].label;
+      $('trial-counter').textContent='Trial '+(state.trial+1)+' of '+total;
+    }
+    $('progress').style.width=(state.trial/total*100)+'%';
+
+    var timerRow=document.querySelector('.timer-row');
+    var reminder=document.querySelector('.reminder');
+    if(state.practice){
+      timerRow.style.display='none';
+      reminder.innerHTML='Warm-up — take your time. Tap the <b>ink colour</b>, not the word';
+    } else {
+      timerRow.style.display='flex';
+      reminder.innerHTML='Tap the <b>ink colour</b> — not the word';
+      $('timer-fill').className='';
+      $('timer-fill').style.transform='scaleX(1)';
+      $('timer-num').className='timer-num';
+      $('timer-num').textContent='3.0s';
+    }
     buildAnswers();
     state.startT=performance.now();
-    runTimer();
+    if(!state.practice)runTimer();
   }
 
   function advance(delay){
     setTimeout(function(){
       state.trial++;
-      if(state.trial>=PER_ROUND){
+      if(state.trial>=trialsThisRound()){
+        if(state.practice){
+          state.practice=false;
+          state.round=0;state.trial=0;
+          showHandoff();return;
+        }
         state.round++;state.trial=0;
         if(state.round>=ROUNDS.length){showResults();return;}
       }
       nextTrial();
     },delay);
+  }
+
+  function showHandoff(){
+    stopTimer();
+    var s=$('stimulus');
+    s.style.color='var(--ink)';
+    s.textContent='GO';
+    $('round-label').textContent='Warm-up complete';
+    $('trial-counter').textContent='';
+    $('progress').style.width='0%';
+    document.querySelector('.timer-row').style.display='none';
+    document.querySelector('.reminder').innerHTML='The timer is now on — <b>3 seconds per word</b>';
+    $('answer-row').innerHTML='';
+    var fb=$('feedback');
+    fb.innerHTML='';
+    var b=document.createElement('button');
+    b.className='btn';b.textContent='Start round 1 →';
+    b.onclick=function(){nextTrial();};
+    fb.appendChild(b);
+    fb.style.color='';
   }
 
   function answer(chosen){
@@ -435,11 +546,13 @@
     stopTimer();
     var rt=performance.now()-state.startT;
     var correct=(chosen===state.current.ink);
-    state.data.push({type:ROUNDS[state.round].type,rt:rt,correct:correct,timedOut:false});
+    if(!state.practice){
+      state.data.push({type:state.current.type,rt:rt,correct:correct,timedOut:false});
+    }
     var fb=$('feedback');
     if(correct){fb.textContent='✓ correct · '+Math.round(rt)+' ms';fb.style.color='var(--green)';}
     else{fb.textContent='✕ wrong — the ink was '+state.current.ink;fb.style.color='var(--red)';}
-    $('progress').style.width=((state.trial+1)/PER_ROUND*100)+'%';
+    $('progress').style.width=((state.trial+1)/trialsThisRound()*100)+'%';
     advance(correct?560:1120);
   }
 
@@ -447,7 +560,7 @@
     if(state.locked)return;
     state.locked=true;
     stopTimer();
-    state.data.push({type:ROUNDS[state.round].type,rt:TIME_LIMIT,correct:false,timedOut:true});
+    state.data.push({type:state.current.type,rt:TIME_LIMIT,correct:false,timedOut:true});
     var fb=$('feedback');
     fb.textContent='⏱ too slow — the ink was '+state.current.ink;
     fb.style.color='var(--red)';
@@ -455,7 +568,7 @@
     $('timer-fill').style.transform='scaleX(0)';
     $('timer-num').className='timer-num danger';
     $('timer-num').textContent='0.0s · time';
-    $('progress').style.width=((state.trial+1)/PER_ROUND*100)+'%';
+    $('progress').style.width=((state.trial+1)/trialsThisRound()*100)+'%';
     advance(1120);
   }
 
@@ -516,7 +629,8 @@
 
   function reset(){
     stopTimer();
-    state={round:0,trial:0,startT:0,locked:false,data:[],raf:0};
+    state={practice:false,round:0,trial:0,startT:0,locked:false,data:[],raf:0};
+    document.querySelector('.timer-row').style.display='flex';
     show('screen-trial');nextTrial();
   }
 
